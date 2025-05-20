@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus } from 'lucide-react';  // Optional: chatbot-style signup icon
+import { UserPlus } from 'lucide-react';
+import DOMPurify from 'dompurify'; // Optional input sanitization
 
 const Signup = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    // Sanitize input for security, especially useful if displayed later
+    setFormData(prev => ({ ...prev, [name]: DOMPurify.sanitize(value) }));
   };
 
   const handleSubmit = async (e) => {
@@ -59,7 +62,9 @@ const Signup = () => {
             name="name"
             type="text"
             placeholder="Name"
+            autoComplete="name"
             onChange={handleChange}
+            value={formData.name}
             required
             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-300 placeholder-gray-500"
           />
@@ -67,7 +72,9 @@ const Signup = () => {
             name="email"
             type="email"
             placeholder="Email"
+            autoComplete="email"
             onChange={handleChange}
+            value={formData.email}
             required
             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-300 placeholder-gray-500"
           />
@@ -75,7 +82,9 @@ const Signup = () => {
             type="password"
             name="password"
             placeholder="Password"
+            autoComplete="off"
             onChange={handleChange}
+            value={formData.password}
             required
             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-300 placeholder-gray-500"
           />

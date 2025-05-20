@@ -1,6 +1,7 @@
 // Import statements should be at the top
 import { useState } from 'react';  // Importing React hooks
 import api from '../services/api';  // Importing the API service
+import DOMPurify from 'dompurify'; // Importing DOMPurify for sanitization
 
 export default function ChatBot() {
   const [input, setInput] = useState('');
@@ -82,8 +83,8 @@ export default function ChatBot() {
 
       {response && (
         <div className="mt-4 p-3 bg-gray-100 rounded-lg space-y-2">
-          <p><strong>Summary:</strong> {response.summary}</p> {/* Show the summary from the response */}
-          <p><strong>Type:</strong> {response.type}</p> {/* Show the type from the response */}
+          <p><strong>Summary:</strong> {DOMPurify.sanitize(response.summary)}</p> {/* Show the summary from the response */}
+          <p><strong>Type:</strong> {DOMPurify.sanitize(response.type)}</p> {/* Show the type from the response */}
           <p><strong>Scheduled For:</strong> {formatDateTime(response.scheduledFor)}</p> {/* Show the formatted scheduled date/time */}
         </div>
       )}

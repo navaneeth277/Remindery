@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { SendHorizonal, Bot, Smile } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; // ✅ Import useNavigate
-import api from "../services/api"
+import { useNavigate } from 'react-router-dom';
+import api from "../services/api";
+import DOMPurify from 'dompurify'; // Import DOMPurify for sanitizing
+
 export default function DiaryEntry() {
   const [diary, setDiary] = useState(null);
   const [input, setInput] = useState('');
@@ -9,7 +11,7 @@ export default function DiaryEntry() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
   const [mood, setMood] = useState(null);
-  const navigate = useNavigate(); // ✅ Hook for navigation
+  const navigate = useNavigate();
 
   const todayDateString = new Date().toISOString().split('T')[0];
 
@@ -19,12 +21,11 @@ export default function DiaryEntry() {
         const token = localStorage.getItem('token');
         const res = await api.get(`/diary-by-date?date=${todayDateString}`, {
           headers: {
-            'Authorization': `${token}`, // Send the token as a Bearer token
+            'Authorization': `${token}`,
           },
         });
-       
-        const json =res.data;
-        console.log('JSON:', json);
+        
+        const json = res.data;
         if (json.success && json.data) {
           setDiary(json.data.content);
           if (json.data.mood) {
@@ -46,42 +47,51 @@ export default function DiaryEntry() {
     setGenerating(true);
     setError('');
 
-      try {
-        const token = localStorage.getItem('token');
-    const res = await api.post(
-  '/diary',
-  {
-    date: todayDateString,
-    input,
-  },
-  {
-    headers: {
-      'Authorization': `${token}`,
-    },
-  }
-);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await api.post(
+        '/diary',
+        {
+          date: todayDateString,
+          input,
+        },
+        {
+          headers: {
+            'Authorization': `${token}`,
+          },
+        }
+      );
 
+      const json = res.data;
 
-    const json = res.data;
-    console.log('Generated Diary:', json);
-
-    if (json?.saved?.content) {
-      setDiary(json.saved.content);
-      if (json.saved.mood) {
-        setMood(json.saved.mood);
+      if (json?.saved?.content) {
+        setDiary(json.saved.content);
+        if (json.saved.mood) {
+          setMood(json.saved.mood);
+        }
+      } else if (json?.summary) {
+        setDiary(json.summary);
+      } else {
+        setError('Failed to generate diary entry.');
       }
-    } else if (json?.summary) {
-      setDiary(json.summary);
-    } else {
-      setError('Failed to generate diary entry.');
+    } catch (err) {
+      console.error('Error:', err);
+      setError('Something went wrong. Try again later.');
     }
-  } catch (err) {
-    console.error('Error:', err);
-    setError('Something went wrong. Try again later.');
-  }
 
-  setGenerating(false);
-};
+    setGenerating(false);
+  };
+
+  const renderDiaryContent = (content) => {
+    // Sanitize content before rendering
+    const sanitizedContent = DOMPurify.sanitize(content);
+
+    // Return elements (you can use regular string manipulation or a library to parse HTML)
+    // For example, let's replace line breaks with <br/> for simplicity:
+    return sanitizedContent.split('\n').map((line, index) => (
+      <p key={index}>{line}</p>
+    ));
+  };
 
   if (loading) {
     return (
@@ -95,7 +105,6 @@ export default function DiaryEntry() {
     return (
       <div className="bg-gradient-to-br from-blue-50 to-purple-100 rounded-xl p-5 shadow space-y-4">
         <div className="flex items-center justify-between">
-          {/* ✅ Make heading clickable */}
           <h3
             className="text-xl font-semibold text-blue-800 cursor-pointer hover:underline"
             onClick={() => navigate('/diary')}
@@ -108,7 +117,9 @@ export default function DiaryEntry() {
             </span>
           )}
         </div>
-        <p className="text-gray-800 whitespace-pre-line leading-relaxed">{diary}</p>
+
+        {/* Render sanitized content without dangerouslySetInnerHTML */}
+        {renderDiaryContent(diary)}
       </div>
     );
   }

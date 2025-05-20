@@ -1,4 +1,7 @@
-import {  Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
 import Dashboard from './pages/Dashboard';
 import Reminder from './pages/MyTasks';
 import MyDiary from './pages/MyDiary';
@@ -7,27 +10,75 @@ import Signup from './loginsigup/signup';
 import './index.css';
 
 function App() {
-  const token = localStorage.getItem('token'); // Get the token from localStorage
+  const [isTokenValid, setIsTokenValid] = useState(false);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'; // Check if the user is on login or signup page
+  const token = localStorage.getItem('token');
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+
+  useEffect(() => {
+    const verifyToken = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        await axios.get('http://localhost:5000/api/auth/verify-token', {
+          headers: {
+            Authorization: `${token}`,
+          },
+        });
+        setIsTokenValid(true);
+      } catch (error) {
+        localStorage.removeItem('token');
+        setIsTokenValid(false);
+        if (!isAuthPage) {
+          navigate('/login');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifyToken();
+  }, [token, isAuthPage, navigate]);
+
+  if (loading) {
+    return <div>Loading...</div>; // Optionally use a spinner here
+  }
 
   return (
-    
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={isAuthPage ? <Login /> : <Navigate to="/" />} />
-        <Route path="/signup" element={isAuthPage ? <Signup /> : <Navigate to="/" />} />
+    <Routes>
+      {/* Auth Pages */}
+      <Route
+        path="/login"
+        element={!isTokenValid ? <Login /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/signup"
+        element={!isTokenValid ? <Signup /> : <Navigate to="/" />}
+      />
 
-        {/* Protected Routes */}
-        <Route path="/" element={token ? <Dashboard /> : <Navigate to="/login" />} />
-        <Route path="/tasks" element={token ? <Reminder /> : <Navigate to="/login" />} />
-        <Route path="/diary" element={token ? <MyDiary /> : <Navigate to="/login" />} />
+      {/* Protected Routes */}
+      <Route
+        path="/"
+        element={isTokenValid ? <Dashboard /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/tasks"
+        element={isTokenValid ? <Reminder /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/diary"
+        element={isTokenValid ? <MyDiary /> : <Navigate to="/login" />}
+      />
 
-        {/* Default Catch-all Route */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    
+      {/* Catch-all */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 }
 
