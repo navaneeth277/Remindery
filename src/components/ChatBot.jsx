@@ -30,7 +30,7 @@ export default function ChatBot() {
 
       const json = res.data;
 
-      console.log('Response:', json);
+      //console.log('Response:', json);
       if (json) {
         setResponse(json.data);
         setInput('');

@@ -18,7 +18,7 @@ export default function SmartReminder() {
         });
 
         const json = res.data;
-        console.log('JSON:', json);
+        //console.log('JSON:', json);
         
         if (json.success) {
           const onlyReminders = json.data.filter(entry => entry.type === 'task');

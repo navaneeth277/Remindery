@@ -51,8 +51,9 @@ export default function MoodHeatmap() {
         <div className="text-gray-500">Loading...</div>
       ) : (
         <div className="grid grid-cols-7 gap-1 text-center">
-          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => (
-            <div className="font-bold text-sm text-gray-600" key={d}>
+          {/* Weekday Headers - FIXED: use index in key */}
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+            <div className="font-bold text-sm text-gray-600" key={`${d}-${i}`}>
               {d}
             </div>
           ))}
@@ -67,20 +68,18 @@ export default function MoodHeatmap() {
             const day = i + 1;
             const mood = moodData[day];
 
-            // Determine if the current day is past or today
             const currentDate = new Date(year, month, day);
-            const isPastOrToday = currentDate <= today; // Past or today
+            const isPastOrToday = currentDate <= today;
 
-            // Assign background color based on whether it's a past, today, or future day
             const bgClass = isPastOrToday
               ? mood
-                ? moodMap[mood] // If mood exists, use the mapped color
-                : 'bg-gray-200' // No mood for today, light gray
-              : 'bg-gray-100'; // Future day, light gray (inactive)
+                ? moodMap[mood]
+                : 'bg-gray-200'
+              : 'bg-gray-100';
 
             return (
               <div
-                key={day}
+                key={`day-${day}`}
                 className={`w-10 h-10 flex items-center justify-center text-xs font-bold rounded ${bgClass}`}
                 title={`Day ${day}${mood ? `: Mood ${mood}` : ''}`}
               >

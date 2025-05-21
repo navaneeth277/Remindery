@@ -19,21 +19,33 @@ export default function DiaryEntry() {
     const fetchDiary = async () => {
       try {
         const token = localStorage.getItem('token');
+        if (!token) {
+          setError('No token found. Please log in.');
+          setLoading(false);
+          return;
+        }
+
+       // console.log("Fetching diary for:", todayDateString);  // Debugging log
         const res = await api.get(`/diary-by-date?date=${todayDateString}`, {
           headers: {
             'Authorization': `${token}`,
           },
         });
-        
+
+      //  console.log("Response from API:", res.data);  // Debugging log
+
         const json = res.data;
         if (json.success && json.data) {
           setDiary(json.data.content);
           if (json.data.mood) {
             setMood(json.data.mood);
           }
+        } else {
+          setError('No diary entry found for today.');
         }
       } catch (err) {
-        console.error('Error fetching diary:', err);
+        console.error('Error fetching diary:', err.response?.status, err.response?.data);
+        setError('Error fetching diary. Try again later.');
       } finally {
         setLoading(false);
       }
@@ -49,6 +61,12 @@ export default function DiaryEntry() {
 
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setError('No token found. Please log in.');
+        setGenerating(false);
+        return;
+      }
+
       const res = await api.post(
         '/diary',
         {
@@ -75,7 +93,7 @@ export default function DiaryEntry() {
         setError('Failed to generate diary entry.');
       }
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Error:', err.response?.status, err.response?.data);
       setError('Something went wrong. Try again later.');
     }
 
@@ -87,7 +105,6 @@ export default function DiaryEntry() {
     const sanitizedContent = DOMPurify.sanitize(content);
 
     // Return elements (you can use regular string manipulation or a library to parse HTML)
-    // For example, let's replace line breaks with <br/> for simplicity:
     return sanitizedContent.split('\n').map((line, index) => (
       <p key={index}>{line}</p>
     ));

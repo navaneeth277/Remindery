@@ -26,7 +26,7 @@ export default function MyTasks() {
           },
         });
 
-        console.log(res.data); // Optional: for debugging purposes
+       
         const json = res.data;
         if (json.success) {
           const onlyReminders = json.data.filter(entry => entry.type === 'reminder');
