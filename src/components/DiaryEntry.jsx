@@ -45,7 +45,8 @@ export default function DiaryEntry() {
         }
       } catch (err) {
         console.error('Error fetching diary:', err.response?.status, err.response?.data);
-        setError('Error fetching diary. Try again later.');
+      
+        
       } finally {
         setLoading(false);
       }

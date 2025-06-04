@@ -26,7 +26,7 @@ function App() {
       }
 
       try {
-        await axios.get('http://localhost:5000/api/auth/verify-token', {
+        await axios.get('http://localhost:5000/api/auth/profile', {
           headers: {
             Authorization: `${token}`,
           },
