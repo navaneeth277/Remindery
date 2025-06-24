@@ -26,7 +26,7 @@ function App() {
       }
 
       try {
-        await axios.get('http://localhost:5000/api/auth/profile', {
+        await axios.get('https://chatmate-backend-ptrw.onrender.com/api/auth/profile', {
           headers: {
             Authorization: `${token}`,
           },
