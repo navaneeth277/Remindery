@@ -64,7 +64,7 @@ export default function ChatBot() {
 
   return (
     <div>
-      <p className="text-lg font-medium mb-4">Hello: How can I assist you today?</p>
+      <p className="text-lg font-medium mb-4">Hello: How Can I Assist You Today? </p>
       <form onSubmit={handleSubmit}>
         <input
           className="w-full p-2 rounded-lg border border-gray-300 mb-2"
